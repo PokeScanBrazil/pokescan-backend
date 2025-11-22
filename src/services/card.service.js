@@ -55,7 +55,7 @@ class CardService {
         collection_2: crawlerResult.collection_2,
         img_url: crawlerResult.image,
         rarity: crawlerResult.rarity,
-        card_type: crawlerResult.type,
+        card_type: crawlerResult.card_type,
         edition_id: edition.id,
       },
     });
