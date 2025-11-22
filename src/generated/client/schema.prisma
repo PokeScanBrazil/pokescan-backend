@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Edition {
+  id     Int    @id @default(autoincrement())
+  name   String
+  abbrev String
+  year   Int
+  cards  Card[]
+
+  @@unique([abbrev, year])
+}
+
+model Card {
+  id           Int     @id @default(autoincrement())
+  name         String
+  collection_1 String
+  collection_2 String
+  img_url      String?
+  rarity       String?
+  card_type    String?
+  edition_id   Int
+  edition      Edition @relation(fields: [edition_id], references: [id])
+
+  @@unique([collection_1, collection_2, edition_id])
+}

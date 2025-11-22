@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: pokescan-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pokescan
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    container_name: pokescan-backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/pokescan
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+
+  prisma-studio:
+    # Reutiliza a imagem do backend, que já tem Node.js, npm e Prisma instalados.
+    build: .
+    container_name: pokescan-prisma-studio
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/pokescan
+    ports:
+      # Porta padrão do Studio
+      - "5555:5555" 
+    volumes:
+      - .:/app
+    # Comando para iniciar o Studio no novo serviço
+    command: ["npx", "prisma", "studio", "--host", "0.0.0.0", "--port", "5555"]
+    # Garante que o serviço pare após fechar
+    restart: "no"
+
+volumes:
+  postgres_data:
