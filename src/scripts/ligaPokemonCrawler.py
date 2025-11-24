@@ -4,13 +4,11 @@ import time
 from bs4 import BeautifulSoup
 from urllib.parse import quote_plus
 from selenium import webdriver
-# Importamos Options e Service para configurar o driver
 from selenium.webdriver.chrome.options import Options 
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 
-# Definimos o caminho onde o ChromeDriver foi instalado no Dockerfile
 DRIVER_PATH = "/usr/local/bin/chromedriver" 
 
 def aquirePokemonCardInfo(cardName, firstNumberCollection, secondNumberCollection):
@@ -19,40 +17,25 @@ def aquirePokemonCardInfo(cardName, firstNumberCollection, secondNumberCollectio
     formattedFirstNumber = str(firstNumberCollection).zfill(3)
     formattedSecondNumber = str(secondNumberCollection).zfill(3)
     url = f"https://www.ligapokemon.com.br/?view=cards%2Fcard&tipo=1&card={formattedName}+%28{formattedFirstNumber}%2F{formattedSecondNumber}%29"
-    #print("🔗 URL:", url)
     
-    # 🌟 CORREÇÃO PARA DOCKER/SELENIUM
-    
-    # 1. Configurar as opções de execução
     chrome_options = Options()
-    # Modo Headless: Essencial para rodar em contêiner sem interface gráfica
     chrome_options.add_argument("--headless")
-    # Desabilita o sandbox: Necessário em muitos ambientes Docker Linux
     chrome_options.add_argument("--no-sandbox")
-    # Evita problemas de memória compartilhada em contêineres
     chrome_options.add_argument("--disable-dev-shm-usage")
-    # Adicionar um tamanho de janela para renderização consistente
     chrome_options.add_argument("--window-size=1920,1080") 
 
-    # 2. Inicia o navegador usando Service para especificar o caminho
-    # Usa o DRIVER_PATH definido acima
     driver = webdriver.Chrome(
         service=ChromeService(executable_path=DRIVER_PATH), 
         options=chrome_options
-    )
-    
-    # Fim da correção
+    ) 
     
     driver.get(url)
-    time.sleep(0.5)  # espera o JS carregar
-
-    # Simula clique no select de edições
+    time.sleep(0.5)
     
     select = driver.find_element(By.CLASS_NAME, "select-card-edition")
     ActionChains(driver).click(select).perform()
-    time.sleep(0.5)  # espera carregar as edições
+    time.sleep(0.5)
     
-
     soup = BeautifulSoup(driver.page_source, "html.parser")
 
     # 🔹 1. Card Image
@@ -68,7 +51,6 @@ def aquirePokemonCardInfo(cardName, firstNumberCollection, secondNumberCollectio
     abbrevEdition = None
 
     if edition_div:
-        # pega só o texto antes do <span>
         nameEdition = edition_div.get_text(" ", strip=True)
         yearSpan = edition_div.find("span", {"class": "year-edition"})
         yearEdition = yearSpan.get_text(strip=True).strip("()") if yearSpan else None
@@ -89,7 +71,7 @@ def aquirePokemonCardInfo(cardName, firstNumberCollection, secondNumberCollectio
                 typeCard = span_list[1].get_text(strip=True)
             break
 
-    driver.quit()  # fecha o navegador
+    driver.quit()
 
     return {
         "name": cardName,
@@ -104,10 +86,9 @@ def aquirePokemonCardInfo(cardName, firstNumberCollection, secondNumberCollectio
     }
 
 if __name__ == "__main__":
-    # Garante que o output seja JSON válido, útil para comunicação com o Node.js
     try:
         if len(sys.argv) < 4:
-            raise IndexError("Argumentos insuficientes. Uso: python script.py <nome> <colecao_1> <colecao_2>")
+            raise IndexError("Insuficient args. Use: python script.py <name> <collection_1> <collection_2>")
             
         name = sys.argv[1]
         collection_1 = sys.argv[2]
@@ -115,6 +96,5 @@ if __name__ == "__main__":
         result = aquirePokemonCardInfo(name, collection_1, collection_2)
         print(json.dumps(result))
     except Exception as e:
-        # Em caso de falha na execução, imprime um erro JSON que pode ser capturado pelo Node.js
         print(json.dumps({"error": str(e), "status": "failed"}))
         sys.exit(1)

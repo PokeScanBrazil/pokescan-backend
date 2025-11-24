@@ -3,32 +3,32 @@ import { runCrawler } from "../Crawler/index.js";
 
 class CardService {
   async findOrCreateCard({ name, collection_1, collection_2 }) {
-    console.log("🔵 [Service] Iniciando findOrCreateCard");
-    console.log("🔹 Dados recebidos:", { name, collection_1, collection_2 });
+    console.log("🔵 [Service] initializing findOrCreateCard");
+    console.log("🔹 Data received:", { name, collection_1, collection_2 });
 
-    console.log("🟣 [Service] Verificando se card existe no banco...");
+    console.log("🟣 [Service] Cheking if card exist on the database...");
     const existingCard = await prisma.card.findFirst({
       where: { name, collection_1, collection_2 },
     });
 
-    console.log("🟣 [Service] Resultado no banco:", existingCard);
+    console.log("🟣 [Service] Database result:", existingCard);
 
     if (existingCard) {
-      console.log("🟢 [Service] Card encontrado no banco");
+      console.log("🟢 [Service] Card not found in database");
       return existingCard;
     }
 
-    console.log("🟠 [Service] Card não existe. Rodando crawler…");
+    console.log("🟠 [Service] Card not registered. Running Crawler…");
     const crawlerResult = await runCrawler(name, collection_1, collection_2);
 
-    console.log("🟠 [Service] Retorno do crawler:", crawlerResult);
+    console.log("🟠 [Service] Crawler return:", crawlerResult);
 
     if (!crawlerResult) {
-      console.log("🔴 [Service] Crawler não encontrou a carta");
-      throw new Error("Crawler não encontrou a carta");
+      console.log("🔴 [Service] Crawler did not find the card");
+      throw new Error("Crawler did not find card");
     }
 
-    console.log("🟢 [Service] Criando edition se necessário...");
+    console.log("🟢 [Service] Creating edition if necessary...");
 
     const edition = await prisma.edition.upsert({
       where: {
@@ -42,12 +42,12 @@ class CardService {
         abbrev: crawlerResult.abbrev_edition,
         year: parseInt(crawlerResult.year_edition, 10),
       },
-      update: {}, // nada para atualizar
+      update: {},
     });
 
-    console.log("🟢 [Service] Edition criada/encontrada:", edition);
+    console.log("🟢 [Service] Edition Found/Created:", edition);
 
-    console.log("🟢 [Service] Criando card no banco...");
+    console.log("🟢 [Service] Inserting card in database...");
     const newCard = await prisma.card.create({
       data: {
         name: crawlerResult.name,
@@ -60,7 +60,7 @@ class CardService {
       },
     });
 
-    console.log("🟢 [Service] Card criado:", newCard);
+    console.log("🟢 [Service] Creating card:", newCard);
     return newCard;
   }
 }

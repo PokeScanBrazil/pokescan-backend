@@ -12,11 +12,11 @@ app.use(express.json()); // permite receber JSON
 
 // exemplo de rota inicial
 app.get("/", (req, res) => {
-  res.json({ message: "API funcionando 🚀" });
+  res.json({ message: "API Working 🚀" });
 });
 
 app.use("/users", usersRoutes);
 app.use("/card", cardRoutes);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
