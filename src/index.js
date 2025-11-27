@@ -8,9 +8,8 @@ dotenv.config();
 const app = express();
 
 app.use(cors());
-app.use(express.json()); // permite receber JSON
+app.use(express.json());
 
-// exemplo de rota inicial
 app.get("/", (req, res) => {
   res.json({ message: "API Working 🚀" });
 });

@@ -28,7 +28,6 @@ services:
       - .:/app
 
   prisma-studio:
-    # Reutiliza a imagem do backend, que já tem Node.js, npm e Prisma instalados.
     build: .
     container_name: pokescan-prisma-studio
     depends_on:
@@ -36,13 +35,11 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/pokescan
     ports:
-      # Porta padrão do Studio
+      # Mapeamento da porta 5555
       - "5555:5555" 
     volumes:
       - .:/app
-    # Comando para iniciar o Studio no novo serviço
-    command: ["npx", "prisma", "studio", "--host", "0.0.0.0", "--port", "5555"]
-    # Garante que o serviço pare após fechar
+    command: ["npx", "prisma", "studio", "--port", "5555", "--browser", "none"]
     restart: "no"
 
 volumes:
