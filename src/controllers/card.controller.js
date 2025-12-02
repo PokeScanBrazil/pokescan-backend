@@ -3,7 +3,7 @@ import { cardService } from "../services/card.service.js";
 export async function findOrCreateCard(req, res) {
 
   try {
-    const { name, collection_1, collection_2 } = req.query;
+    const { name, collection_1, collection_2 } = req.body;
 
     if (!name || !collection_1 || !collection_2) {
       console.log("🔴 [Controller] Missing params");
